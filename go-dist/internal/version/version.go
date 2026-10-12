@@ -3,5 +3,5 @@ package version
 
 const (
 	Name    = "FenPei 文件分发系统"
-	Version = "1.3.1"
+	Version = "1.3.2"
 )

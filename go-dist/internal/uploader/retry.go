@@ -51,6 +51,12 @@ func (u *Uploader) runUpload(folderName string, report Reporter, progress Progre
 		if ok {
 			return true, msg
 		}
+		if step == "task_state_invalid" {
+			if report != nil {
+				report(folderName, "retry_exhausted", msg)
+			}
+			return false, msg
+		}
 		if retry == u.cfg.MaxRetries {
 			final := fmt.Sprintf("重试已达上限：首次尝试 + %d 次重试（共 %d 次），失败步骤：%s，原因：%s；已停止自动重试，保留本地数据", u.cfg.MaxRetries, u.cfg.MaxRetries+1, step, msg)
 			if progress != nil {

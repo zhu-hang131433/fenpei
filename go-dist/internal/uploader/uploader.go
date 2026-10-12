@@ -118,12 +118,27 @@ func (u *Uploader) doUpload(folderPath, folderName string, report Reporter, prog
 		}
 		session.TaskID = id
 		session.TaskItem = item
-		switch mstr(item["status"]) {
+	}
+	if session.RefreshLifecycle {
+		item, err := p.GetTaskInfo(session.TaskID)
+		if err != nil {
+			return fail("state_refresh_failed", "重新查询任务状态失败: "+err.Error())
+		}
+		session.TaskItem = item
+		session.RefreshLifecycle = false
+	}
+	if !session.CollectionDone {
+		state := strings.ToLower(strings.TrimSpace(mstr(session.TaskItem["status"])))
+		u.logf("匹配平台任务: ID=%s 名称=%s 原始状态=%v", session.TaskID, mstr(session.TaskItem["collectionTaskName"]), session.TaskItem["status"])
+		switch state {
 		case "completed", "已完成":
-			session.StartDone = true
-			session.CollectionDone = true
+			session.StartDone, session.CollectionDone = true, true
 		case "in_progress", "collecting", "进行中", "采集中":
 			session.StartDone = true
+		case "pending", "待采集":
+			// 仅明确待采集的任务允许调用开始接口。
+		default:
+			return fail("task_state_invalid", fmt.Sprintf("平台任务 ID=%s，名称=%s，状态=%v：无法确认可采集状态，已停止上传，请检查平台任务", session.TaskID, mstr(session.TaskItem["collectionTaskName"]), session.TaskItem["status"]))
 		}
 	}
 	taskID, taskItem := session.TaskID, session.TaskItem
@@ -136,16 +151,20 @@ func (u *Uploader) doUpload(folderPath, folderName string, report Reporter, prog
 	}
 	if !session.StartDone {
 		if err := p.StartTask(taskID); err != nil {
+			session.RefreshLifecycle = true
 			return fail("start_failed", "开始任务失败: "+err.Error())
 		}
 		session.StartDone = true
 	}
 	if !session.CollectionDone {
 		if !session.IdleSent {
-			p.ReportHealth("idle", "idle", 0)
+			if err := p.ReportHealth("idle", "idle", 0); err != nil {
+				return fail("heartbeat_failed", "结束前心跳上报失败: "+err.Error())
+			}
 			session.IdleSent = true
 		}
 		if err := p.CompleteCollection(taskID, map[string]any{"actualCount": 0, "collectStatus": "completed"}); err != nil {
+			session.RefreshLifecycle = true
 			return fail("complete_failed", "结束任务失败: "+err.Error())
 		}
 		session.CollectionDone = true

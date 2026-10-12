@@ -221,8 +221,12 @@ func (p *Platform) GetTaskList(current, size int) ([]any, int, error) {
 		return nil, 0, fmt.Errorf("retCode=%v retMsg=%v", r["retCode"], r["retMsg"])
 	}
 	rd := mapOf(r["retData"])
-	records, _ := rd["records"].([]any)
-	return records, mint(rd["pages"]), nil
+	records, ok := rd["records"].([]any)
+	pages := mint(rd["pages"])
+	if !ok || pages < 0 || (len(records) > 0 && pages < current) {
+		return nil, 0, fmt.Errorf("任务列表分页字段异常，无法确认所有候选任务")
+	}
+	return records, pages, nil
 }
 
 // FindMatchingTask 在当前登录账号的任务中按末尾八位日期编号唯一匹配。
@@ -250,7 +254,7 @@ func (p *Platform) FindMatchingTask(taskName string) (string, map[string]any, er
 					return "", nil, fmt.Errorf("匹配任务缺少任务 ID: %s", suffix)
 				}
 				if matchedID != "" && matchedID != id {
-					return "", nil, fmt.Errorf("当前账号有多个任务的日期编号为 %s，无法唯一匹配", suffix)
+					return "", nil, fmt.Errorf("当前账号有多个任务的日期编号为 %s，无法唯一匹配（ID=%s、%s），请清理旧任务或修改日期编号", suffix, matchedID, id)
 				}
 				matchedID, matched = id, item
 			}
