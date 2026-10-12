@@ -69,6 +69,9 @@ func TestTaskLifecycleBeforeUpload(t *testing.T) {
 				}
 			}))
 			defer server.Close()
+			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+			t.Setenv("FENPEI_PLATFORM_PASSWORD", "test-password")
+			t.Setenv("FENPEI_DAG_ACCESS_TOKEN", "test-token")
 			t.Setenv("FENPEI_BASE_URL", server.URL)
 			u := New(Config{LogDir: t.TempDir()})
 			step := ""
