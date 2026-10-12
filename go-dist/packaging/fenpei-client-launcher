@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+client_data="${XDG_DATA_HOME:-$HOME/.local/share}/fenpei"
+mkdir -p "$client_data/received" "$client_data/logs"
+exec 9>"$client_data/client.lock"
+if ! flock -n 9; then
+    xdg-open http://127.0.0.1:18080/ >/dev/null 2>&1 || true
+    exit 0
+fi
+cd "$client_data"
+exec /usr/lib/fenpei/fenpei --dest "$client_data/received" "$@" >>"$client_data/logs/launcher.log" 2>&1

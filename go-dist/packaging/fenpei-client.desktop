@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=FenPei
+Name[zh_CN]=FenPei 文件分发
+Comment=Discover the LAN server and process assigned tasks
+Comment[zh_CN]=按账号进入服务端管理或客户端工作台
+Exec=fenpei
+Icon=fenpei
+Terminal=false
+Categories=Network;Utility;
+StartupNotify=false

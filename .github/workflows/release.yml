@@ -1,0 +1,37 @@
+name: Publish FenPei Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+      - name: Verify version and test
+        shell: bash
+        run: |
+          version=$(sed -n 's/.*Version *= *"\([^"]*\)".*/\1/p' go-dist/internal/version/version.go)
+          test "$GITHUB_REF_NAME" = "v$version"
+          cd go-dist
+          go test -race ./...
+          go vet ./...
+      - name: Build release artifacts
+        run: bash go-dist/build-release.sh
+      - name: Publish installation packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          gh release create "$GITHUB_REF_NAME" \
+            "go-dist/dist/fenpei_${version}-1_amd64.deb" \
+            "go-dist/dist/fenpei_${version}_linux_amd64.tar.gz" \
+            "go-dist/dist/fenpei_${version}_SHA256SUMS.txt" \
+            --verify-tag --title "FenPei $GITHUB_REF_NAME" --generate-notes

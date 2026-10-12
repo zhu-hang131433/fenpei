@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FenPei · 客户端</title><link rel="stylesheet" href="/assets/workspace/style.css"><link rel="stylesheet" href="/assets/workspace/update.css"></head>
+<body data-agent-base="{{AGENT_BASE}}"><main>
+<header><div class="identity"><span class="brand">FenPei</span><span>客户端工作台</span></div><div><span id="connection" role="status">正在连接本机客户端…</span> <button id="logout" hidden>退出登录</button></div></header>
+<section class="control"><div><h1 id="state">正在寻找服务端</h1><p id="hint">自动连接同一局域网内的服务端，点击开始工作后执行任务。</p><p class="endpoint"><span id="server">尚未发现服务端</span><span id="label"></span></p></div><div class="actions"><button id="start" class="primary" disabled>开始工作</button><button id="pause" disabled>暂停</button></div></section>
+<section id="appUpdate" class="app-update" aria-label="应用更新"></section>
+<p id="error" class="error" role="alert" hidden></p>
+<section class="progress-panel" aria-label="任务进度监控"><div class="panel-heading"><h2>任务进度</h2><span id="counts">已完成 0 · 异常 0</span></div><div class="task-heading"><strong id="task">还没有领取任务</strong><span id="phase">准备就绪</span></div>
+<div class="stages"><article><div><h3>下载</h3><span id="downloadText">—</span></div><progress id="download" max="100" value="0" aria-label="下载进度"></progress></article><article><div><h3>压缩</h3><span id="compressText">—</span></div><progress id="compress" max="100" value="0" aria-label="压缩进度"></progress></article><article><div><h3>上传</h3><span id="uploadText">—</span></div><progress id="upload" max="100" value="0" aria-label="上传进度"></progress></article></div>
+<div class="task-foot"><span id="bytes">等待任务</span><span id="mode">下载后自动上传</span></div><p class="destination">保存目录：<span id="dest">—</span></p></section>
+<section class="logs-panel"><div class="panel-heading"><h2>运行日志</h2><span>最近 500 条 · 自动更新</span></div><div id="logs" class="logs" role="log" aria-live="off" tabindex="0"><p>正在获取客户端日志…</p></div></section>
+<footer><span>暂停立即停止当前任务，继续工作后恢复。</span><span id="updated">每秒更新</span></footer>
+</main><script type="module" src="/assets/workspace/app.js"></script></body></html>

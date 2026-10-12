@@ -1,0 +1,17 @@
+# Runtime data, private settings, local build artifacts
+/go-dist/bin/
+/go-dist/dist/
+/go-dist/distribute_state.json
+**/received/
+**/logs/
+**/.stale-task-*/
+**/platform.json
+.env
+.env.*
+*.log
+*.tmp
+# Legacy local scripts contain site-specific credentials; publish Go sources only.
+/client.py
+/server.py
+/auto_upload.py
+/项目逻辑说明.html
